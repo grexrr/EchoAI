@@ -1,15 +1,15 @@
 # EchoAI
 
 
-##Stage 1: Project Setup and Development Environment Preparation
+#Stage 1: Project Setup and Development Environment Preparation
 
 ***
-
-#### Objectives:
-
 - Establish a solid foundation for the project, ensuring all development tools and environments are properly configured.
 
-#### Steps:
+## Highlights
+
+- Use of **Docker** for containerization and automated management of the local development environment. Particularly, utilizing `docker-compose` to initiate MySQL and Spring Boot services, demonstrating an understanding of containerization and microservices.
+# Steps
 
 1. **GitHub Repository Creation**:
     - Create a new repository on GitHub for version control and to document project progress.
@@ -21,17 +21,13 @@
 4. **Hello World Basic Application**:
     - Develop a simple Spring Boot application to verify that the development environment is functioning correctly and execute the application through a Docker container.
 
-#### Future AWS Deployment:
+## Future AWS Deployment:
 
 - Configure Docker and Docker Compose to simplify future deployment on AWS platforms such as EC2 or Elastic Beanstalk, ensuring consistency across environments.
-#### Highlights:
+# Log
 
-- Emphasize the use of **Docker** for containerization and automated management of the local development environment. Particularly, utilizing `docker-compose` to initiate MySQL and Spring Boot services, demonstrating an understanding of containerization and microservices.
-- Demonstrate proficiency in **GitHub project management**, showing how to use GitHub for version control and collaborative development (project link provided).
-- 
-#### Issues Encountered and Solutions:
-
-#####  Issue1: Initial test run
+## Sept. 8 2024
+### Issue1: Initial test run
 
 Attempt to access:
 
@@ -51,7 +47,7 @@ Received error:
 Failed to configure a DataSource: 'url' attribute is not specified and no embedded datasource could be configured.
 ```
 
-###### Reason & Solution
+#### Reason & Solution
 
 Spring Boot fail to configure **DataSource (DB)** and DB connection as default. Since no imbedded DB (like H2) had been configured by this stage, the issue occurred. By temporarily disabling **DataSourceAutoConfiguration.class** it allows access through localhost: 8080. However, Spring Security still requires a login. To bypass the blockage **SecurityAutoConfiguration.class** should also be disabled.
 
@@ -64,7 +60,7 @@ public class EchoAiApplication {
 }
 ```
 
-#####  Issue2: Testing Docker Image via Dockerfile
+###  Issue2: Testing Docker Image via Dockerfile
 
 Encountered error:
 
@@ -90,9 +86,52 @@ lead to the following issue:
 ```
 line 114: ./.mvn/wrapper/maven-wrapper.properties: No such file or directory cannot read distributionUrl property in ./.mvn/wrapper/maven-wrapper.properties
 ```
-###### Reason & Solution
+#### Reason & Solution
 
 The Maven Wrapper is a script that allows different developers to work under the same Maven version. By running `./mvnw clean package`, it cleans the last build under /target and packages a new version of the JAR, allowing the Docker image to load it.
 
+***
 
+#Stage2. User Authentication System
 
+***
+- Develop a User Authentication system including registration, login, and dialogue management.
+## Highlights
+
+- **Spring Security** + **JWT认证**，展示对现代身份验证机制的理解，以及对API安全性保障的能力。
+- 使用**PostgreSQL**数据库，并通过**JPA**实现数据持久化，这显示对关系型数据库的熟练操作。
+- **Swagger**的API文档生成
+# Steps
+
+1. **Database Integration**:
+    - Database: Launch **PostgreSQL** in docker
+    - Configure **Spring Data JPA** in Spring Boot to simplify interaction with db
+    - Define Java class mapping to db tables
+2. **User Authentication System**:
+	- Configure Spring Security to define security strategy and permission
+	- JWT (JSON Web Token): Use JWT for stateless authentication to facilitate integration with frontend and mobile application
+	- Register and Login endpoints to implement JWT authentication
+	- User info storage
+# Log
+## Sept. 10 2024
+
+### 1. Set up *application.properties*
+
+A docker image containing PostgreSQL is launched. 
+
+In ***application.properties*** following changes are made allowing JAVA main to establish control over DB through port 5432:
+```
+#Setting DB connection
+
+spring.datasource.url=jdbc:postgresql://localhost:5432/echoaidb
+spring.datasource.username=echoai_user
+spring.datasource.password=echoai_password
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+#Setting JPA
+
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+```
+#### Issue1: 
