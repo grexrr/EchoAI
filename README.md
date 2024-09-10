@@ -96,11 +96,7 @@ The Maven Wrapper is a script that allows different developers to work under the
 
 ***
 - Develop a User Authentication system including registration, login, and dialogue management.
-## Highlights
 
-- **Spring Security** + **JWT认证**，展示对现代身份验证机制的理解，以及对API安全性保障的能力。
-- 使用**PostgreSQL**数据库，并通过**JPA**实现数据持久化，这显示对关系型数据库的熟练操作。
-- **Swagger**的API文档生成
 # Steps
 
 1. **Database Integration**:
@@ -115,7 +111,7 @@ The Maven Wrapper is a script that allows different developers to work under the
 # Log
 ## Sept. 10 2024
 
-### 1. Set up *application.properties*
+### 1. Configuring Spring Boot connection to DB
 
 A docker image containing PostgreSQL is launched. 
 
@@ -134,4 +130,86 @@ spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 ```
+
+### 2. Testing User class
+
+1. Declaring User class as an entity:
+   
+   ```JAVA
+package com.echoai.model;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    //username
+    //password
+    //getter & setter
+}
+```
+
+- **@Entity** parsed by JPA Hibernation. Its properties will be mapped to a table under SQL (ORM) allowing CRUD manipulation. 
+- @**ID** will identify id as a primary key
+- @**GeneratedValue** controls SQL's strategy to generate the key
+   
+2. UserRepository interface is used by JPA(Hibernate) to execute CRUD
+3. UserController injects UserRepository to use its CRUD functions and map them to a particular URL as following:
+   
+```JAVA
+@RestController
+public class UserController {
+	@Autowired
+	private UserRepository userRepository;
+	
+	//@GetMapping("/addUser")
+	//public void addUser(@RequestParam String username, 
+	//					  @RequestParam String password){...}
+	//...
+}
+```
 #### Issue1: 
+
+**Cannot load driver class: org.postgresql.Driver**
+Because Maven needs to import a PostgreSQL driver which I did not know.
+#### Reason & Solution
+
+```XML
+<dependency> 
+	<groupId>org.postgresql</groupId> 
+	<artifactId>postgresql</artifactId> 
+	<version>42.7.4</version> 
+</dependency>
+```
+
+42.7.4 was the latest version at the time of editing.
+
+#### Issue2: 
+
+Encountering...
+
+```
+Whitelabel Error Page 
+
+This application has no explicit mapping for /error, so you are seeing this as a fallback. Tue Sep 10 05:18:09 IST 2024 There was an unexpected error (type=Internal Server Error, status=500).
+```
+
+...while testing /addUser.
+
+#### Reason & Solution
+
+"status-500" indicates a connection is established so the problem is within DB.
+
+Terminal prompts...
+
+```
+ERROR: syntax error at or near "user" Position: 13 
+```
+
+Reason being "user" has been reserved by PostgreSQL. So rename the user table will be the solution by annotating User class with @Table(name = "<somename>")
