@@ -29,8 +29,14 @@ public class UserController {
         return userRepository.findAll();
     }
 
-    // @GetMapping("/getUser")
-    // public User getUser(@RequestParam Long id){
-    //     return userRepository.findById(id).orElse(null);
-    // }
+    @GetMapping("/removeUser")
+    public String removeUser(@RequestParam String username){
+        User user = userRepository.findByUsername(username);
+        if (user != null) {
+            userRepository.delete(user);
+            return "User removed successfully";
+        } else {
+            return "User not found";
+        }
+    }
 }
