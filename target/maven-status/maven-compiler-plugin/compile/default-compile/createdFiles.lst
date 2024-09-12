@@ -1,5 +1,7 @@
 grexrr/echoai/HelloController.class
+grexrr/echoai/config/SecurityConfig.class
+grexrr/echoai/EchoaiApplication.class
 grexrr/echoai/repository/UserRepository.class
 grexrr/echoai/model/User.class
-grexrr/echoai/EchoaiApplication.class
+grexrr/echoai/controller/TestController.class
 grexrr/echoai/controller/UserController.class

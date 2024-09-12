@@ -213,3 +213,28 @@ ERROR: syntax error at or near "user" Position: 13
 ```
 
 Reason being "user" has been reserved by PostgreSQL. So rename the user table will be the solution by annotating User class with @Table(name = "<somename>")
+
+
+## Sept. 12 2024
+
+### 1. Configuring Initial Authentication
+
+Disable anti CSRF for the current stage. Configuring basic authentication mechanism as following: requiring all incoming http request to authenticate except for the ones matching pattern `/public/**`.
+
+```JAVA
+@Bean
+
+SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	http
+	.csrf(csrf -> csrf.disable()) // Disable CSRF (FOR NOW !!!!!!)
+	.authorizeHttpRequests(auth -> auth // Configuring Authentication Rules
+	.requestMatchers("/public/**").permitAll() // Public Paths
+	.anyRequest().authenticated() // Others require authentication
+	)
+	.httpBasic(withDefaults()); // Default launching HTTP Basic authentication
+	return http.build();
+
+}
+```
+
+2 testing endpoints (public & non-public) past the test. JWT will be based upon this stage.
