@@ -20,6 +20,7 @@ public class UserController {
         return userService.registerUser(username, password);
     }
 
+    //for testing purposes
     @GetMapping("public/getAllUsers")
     public List<User> getAllUsers(){
         return userService.getAllUsers();

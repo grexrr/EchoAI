@@ -1,22 +1,25 @@
-package grexrr.echoai.config;
+package grexrr.echoai.security;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -26,21 +29,12 @@ public class SecurityConfig {
                                 .anyRequest().authenticated()  // Others require authentication
                 )
                 .httpBasic(withDefaults());  // Default launching HTTP Basic authentication
-    return http.build();
+        return http.build();
     }
 
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    @Autowired
+    private void configureGlobal(AuthenticationManagerBuilder auth) throws Exception{
+        auth.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder);
     }
 
-    @Bean
-        public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
-            UserDetails user = User.builder()
-                    .username("user")
-                    .password(passwordEncoder.encode("password"))  // 加密密码
-                    .roles("USER")
-                    .build();
-            return new InMemoryUserDetailsManager(user);
-        }
 }
