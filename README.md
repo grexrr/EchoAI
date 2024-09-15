@@ -237,4 +237,69 @@ SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 }
 ```
 
-2 testing endpoints (public & non-public) past the test. JWT will be based upon this stage.
+2 testing endpoints (public & non-public) passed the test. JWT will be based upon this stage.
+
+### 2. UserDetailsService
+
+Basic user authentication is implemented through Spring Security. To support a complete registration and authentication, a ***UserDetailsService*** is required to load id information. It reads from database allowing Spring Security to handle the authentication.
+
+In Spring Security, authentication involves:
+- User input of UserName && Password
+- Server authenticates the **UserDetails** returned in `UserDetailsService` to check if there's a match in the database
+- If authenticated, a JWT will be granted in the following requests. The JWT will be attached to HTTP headers of any subsequent requests sent by clients.
+
+#### Configuring rules for authentication
+
+In **SecurityConfig**, an autowired global configuration sets the rule of authentication by:
+
+```JAVA
+@Autowired
+private void configureGlobal(AuthenticationManagerBuilder auth) throws Exception{
+	auth.userDetailsService(customUserDetailsService)
+	.passwordEncoder(passwordEncoder)
+}
+```
+(`customerUserDetailsService` and `passwordEncoder` are already configured.)
+
+
+##### 1. **`auth.userDetailsService(customUserDetailsService)` acquires encoded user info from  DB
+
+- `auth.userDetailsService(customUserDetailsService)` tells Spring Security how to acquires user information when they login
+- `customUserDetailsService` is the specific bean responsible for the task。
+- Returned information is encapsulated in `UserDetails` and past to Spring Security for the subsequent authentication
+
+##### 2. **`loadUserByUsername` acquires a password**
+
+`loadUserByUsername()` acquires a `UserDetails` class from DB which includes username, encoded password and other information (such as authorities).
+
+- **Username**: `john`
+- **Encoded PW**: `bcrypt$2a$10$hashedPasswordHere`
+
+When the user login, Spring Security calls `loadUserByUsername()` defined in: 
+
+ `CustomUserDetailsService`：
+```java
+@Override
+public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    User user = userRepository.findByUsername(username);
+    if (user == null) {
+        throw new UsernameNotFoundException("User not found with username: " + username);
+    }
+    return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), new ArrayList<>());
+}
+```
+
+##### 3. **`.passwordEncoder(passwordEncoder)` encodes the users' input**
+
+- `.passwordEncoder(passwordEncoder)` encodes users' readable inputs into encoded string using `BCryptPasswordEncoder` 
+- Result will be compared to `UserDetails` 
+
+#### Issue1: 
+
+Attempt to test-launch the server
+
+`org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'userController': Unsatisfied dependency expressed through field 'userService': Error creating bean with name 'userService': Unsatisfied dependency expressed through field 'passwordEncoder': Error creating bean with name 'securityConfig': Requested bean is currently in creation: Is there an unresolvable circular reference?`
+
+#### Reason & Solution
+
+As indicated by the prompt, `userService` and `securityConfig` are injecting `BCryptPasswordEncoder` at the same time resulting a circular reference. So the encoder will be separately built in a new `AppConfig` class.

@@ -20,6 +20,11 @@ public class SecurityConfig {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private void configureGlobal(AuthenticationManagerBuilder auth) throws Exception{
+        auth.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder);
+    }
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -32,9 +37,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Autowired
-    private void configureGlobal(AuthenticationManagerBuilder auth) throws Exception{
-        auth.userDetailsService(customUserDetailsService).passwordEncoder(passwordEncoder);
-    }
+    
 
 }
