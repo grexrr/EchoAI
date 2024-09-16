@@ -36,7 +36,4 @@ public class SecurityConfig {
                 .httpBasic(withDefaults());  // Default launching HTTP Basic authentication
         return http.build();
     }
-
-    
-
 }

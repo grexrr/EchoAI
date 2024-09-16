@@ -1,4 +1,0 @@
--------------------------------------------------------------------------------
-Test set: grexrr.echoai.EchoaiApplicationTests
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.210 s -- in grexrr.echoai.EchoaiApplicationTests
