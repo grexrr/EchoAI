@@ -1,8 +1,19 @@
-version: '3.4'
-
 services:
+  app:
+    image: echoai-app:latest
+    container_name: echoai-app
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/echoaidb
+      SPRING_DATASOURCE_USERNAME: echoai_user
+      SPRING_DATASOURCE_PASSWORD: echoai_password
+    depends_on:
+      - db
+
   db:
     image: postgres:13
+    container_name: echoai-db
     environment:
       POSTGRES_DB: echoaidb
       POSTGRES_USER: echoai_user
@@ -10,7 +21,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  postgres-data:
+  postgres_data:

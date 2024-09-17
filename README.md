@@ -215,91 +215,99 @@ ERROR: syntax error at or near "user" Position: 13
 Reason being "user" has been reserved by PostgreSQL. So rename the user table will be the solution by annotating User class with @Table(name = "<somename>")
 
 
-## Sept. 12 2024
+## Sept. 16, 2024
 
-### 1. Configuring Initial Authentication
+### 1. Configure Jenkins Local Environment
 
-Disable anti CSRF for the current stage. Configuring basic authentication mechanism as following: requiring all incoming http request to authenticate except for the ones matching pattern `/public/**`.
+#### Goal:
+Implement a CI/CD pipeline using **Jenkins** to automate the management of Spring Boot applications and database Docker images.
 
-```JAVA
-@Bean
+#### Steps:
 
-SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-	http
-	.csrf(csrf -> csrf.disable()) // Disable CSRF (FOR NOW !!!!!!)
-	.authorizeHttpRequests(auth -> auth // Configuring Authentication Rules
-	.requestMatchers("/public/**").permitAll() // Public Paths
-	.anyRequest().authenticated() // Others require authentication
-	)
-	.httpBasic(withDefaults()); // Default launching HTTP Basic authentication
-	return http.build();
+1. **Jenkins Installation**: Install Jenkins via Docker and run the Jenkins service in the local environment.
+    ```bash
+    docker run -p 9090:8080 -p 50000:50000 jenkins/jenkins:lts
+    ```
+2. **Pull Application Code**: Configure Jenkins to pull the application code from a GitHub repository for continuous integration testing.
+3. **Docker Management**: Attempt to manage Docker images directly within the Jenkins container, using `docker-compose` to start the Spring Boot application and PostgreSQL database.
 
-}
-```
+#### Issues1: 
 
-2 testing endpoints (public & non-public) passed the test. JWT will be based upon this stage.
+While attempting to use a Jenkins container to manage local Docker images through the Docker socket, I encountered a startup sequence issue. The problem arises because:
 
-### 2. UserDetailsService
-
-Basic user authentication is implemented through Spring Security. To support a complete registration and authentication, a ***UserDetailsService*** is required to load id information. It reads from database allowing Spring Security to handle the authentication.
-
-In Spring Security, authentication involves:
-- User input of UserName && Password
-- Server authenticates the **UserDetails** returned in `UserDetailsService` to check if there's a match in the database
-- If authenticated, a JWT will be granted in the following requests. The JWT will be attached to HTTP headers of any subsequent requests sent by clients.
-
-#### Configuring rules for authentication
-
-In **SecurityConfig**, an autowired global configuration sets the rule of authentication by:
-
-```JAVA
-@Autowired
-private void configureGlobal(AuthenticationManagerBuilder auth) throws Exception{
-	auth.userDetailsService(customUserDetailsService)
-	.passwordEncoder(passwordEncoder)
-}
-```
-(`customerUserDetailsService` and `passwordEncoder` are already configured.)
-
-
-##### 1. **`auth.userDetailsService(customUserDetailsService)` acquires encoded user info from  DB
-
-- `auth.userDetailsService(customUserDetailsService)` tells Spring Security how to acquires user information when they login
-- `customUserDetailsService` is the specific bean responsible for the task。
-- Returned information is encapsulated in `UserDetails` and past to Spring Security for the subsequent authentication
-
-##### 2. **`loadUserByUsername` acquires a password**
-
-`loadUserByUsername()` acquires a `UserDetails` class from DB which includes username, encoded password and other information (such as authorities).
-
-- **Username**: `john`
-- **Encoded PW**: `bcrypt$2a$10$hashedPasswordHere`
-
-When the user login, Spring Security calls `loadUserByUsername()` defined in: 
-
- `CustomUserDetailsService`：
-```java
-@Override
-public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    User user = userRepository.findByUsername(username);
-    if (user == null) {
-        throw new UsernameNotFoundException("User not found with username: " + username);
-    }
-    return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), new ArrayList<>());
-}
-```
-
-##### 3. **`.passwordEncoder(passwordEncoder)` encodes the users' input**
-
-- `.passwordEncoder(passwordEncoder)` encodes users' readable inputs into encoded string using `BCryptPasswordEncoder` 
-- Result will be compared to `UserDetails` 
-
-#### Issue1: 
-
-Attempt to test-launch the server
-
-`org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'userController': Unsatisfied dependency expressed through field 'userService': Error creating bean with name 'userService': Unsatisfied dependency expressed through field 'passwordEncoder': Error creating bean with name 'securityConfig': Requested bean is currently in creation: Is there an unresolvable circular reference?`
-
+- The Spring Boot application requires the PostgreSQL database to be up and running before it can start.
+- However, the database is managed by docker-compose, and both services are tied together in the same docker-compose file, leading to a race condition where the application might attempt to start before the database is ready.
 #### Reason & Solution
 
-As indicated by the prompt, `userService` and `securityConfig` are injecting `BCryptPasswordEncoder` at the same time resulting a circular reference. So the encoder will be separately built in a new `AppConfig` class.
+To resolve the startup sequence issue, I split the original docker-compose file into two distinct files:
+
+1. The first docker-compose file is responsible for launching the PostgreSQL database container and ensuring it’s up and running.
+```yml
+services:
+	db:
+	image: postgres:13
+	environment:
+		POSTGRES_DB: echoaidb
+		POSTGRES_USER: echoai_user
+		POSTGRES_PASSWORD: echoai_password
+	ports:	
+		- "5432:5432"
+	volumes:
+		- postgres-data:/var/lib/postgresql/data
+volumes:
+	postgres-data:
+```
+
+2. The second docker-compose file will handle the application container startup, which only executes after the database has been successfully initialized and is available. Finally, the second `docker-compose-app.yml` **supposed to** start the application, using the depends_on directive to ensure that the database is ready before the application starts.
+3. 
+#### Issues2:
+During the process, it was found that `docker-compose` and `docker compose` commands could not be used inside the Jenkins container because the local environment is ARM architecture (Apple M1/M2 chips), while the Jenkins container relies on x86 architecture Docker tools. This prevents Jenkins from directly starting Docker services and managing the CI/CD process within the container.
+
+#### Solution Attempts:
+- Tried exposing the local Docker environment to the Jenkins container via `Docker socket`, hoping that the Jenkins container could use the host's Docker service for build and deployment operations. However, due to architecture issues, the `docker-compose` command still could not run properly.
+
+#### Logs:
+During testing, it was found that Jenkins has compatibility issues running `docker-compose` on ARM architecture. It was ultimately confirmed that the Jenkins container could not use `docker-compose` and `docker compose` to manage application and database images due to ARM and x86 architecture compatibility issues.
+
+---
+
+## Solution Direction
+
+### Use a More General System Architecture for CI/CD Automation
+
+#### Feasibility of Kubernetes:
+
+**Kubernetes** can serve as a more general architecture, especially suitable for automating the deployment and management of containerized applications. Compared to Docker Compose, Kubernetes offers more powerful container orchestration and management capabilities, making it suitable for cross-platform deployment needs. Kubernetes provides better scalability and cross-architecture support, allowing for consistency between local development and cloud deployment.
+
+---
+
+### Consideration of Dual-Environment vs. Kubernetes:
+
+**Dual-Environment (Docker)**: This approach involves local development using Docker for testing while relying on an EC2-based Jenkins server for testing, building, and deployment in the cloud. Local Docker is ARM-based, while EC2 is x86-based.
+
+- **Advantages**:
+    
+    - Easier to set up locally using Docker for fast, iterative development.
+    - Lower initial learning curve since Docker Compose is simpler than Kubernetes.
+- **Disadvantages**:
+    
+    - Managing large-scale, distributed systems with Docker Compose can be challenging.
+    - Potential issues with differences in ARM (local) and x86 (EC2) environments, requiring multi-architecture Docker images.
+
+**Kubernetes Solution**: This approach involves using **Minikube** or **K3s** locally to simulate a Kubernetes environment and deploying to a full Kubernetes cluster (e.g., EKS on AWS) in the cloud.
+
+- **Advantages**:
+    
+    - **Unified development and production environments**: By using Kubernetes in both local and cloud environments, the development workflow is consistent, minimizing potential discrepancies between development and production.
+    - **Scalability**: Kubernetes is better suited for handling large-scale, distributed applications with its built-in tools for auto-scaling, load balancing, and service discovery.
+    - **Future-proofing**: As applications grow, Kubernetes provides more advanced features for managing complex architectures, including multi-cloud and hybrid deployments.
+- **Disadvantages**:
+    
+    - **Higher initial complexity**: Kubernetes has a steeper learning curve than Docker Compose, especially for developers new to container orchestration.
+    - **Resource-intensive**: Running Kubernetes locally or in the cloud requires more resources compared to Docker Compose.
+
+---
+
+### Decision:
+
+The **Kubernetes solution** is the preferred option, as it provides a scalable, future-proof infrastructure for automating deployment and management of containerized applications. While the initial setup may be more complex, Kubernetes offers superior support for distributed systems and cross-platform deployment, ensuring consistency between local development and cloud production environments.
