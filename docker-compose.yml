@@ -8,20 +8,6 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/echoaidb
       SPRING_DATASOURCE_USERNAME: echoai_user
       SPRING_DATASOURCE_PASSWORD: echoai_password
-    depends_on:
-      - db
-
-  db:
-    image: postgres:13
-    container_name: echoai-db
-    environment:
-      POSTGRES_DB: echoaidb
-      POSTGRES_USER: echoai_user
-      POSTGRES_PASSWORD: echoai_password
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:

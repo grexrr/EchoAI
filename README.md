@@ -311,3 +311,115 @@ During testing, it was found that Jenkins has compatibility issues running `dock
 ### Decision:
 
 The **Kubernetes solution** is the preferred option, as it provides a scalable, future-proof infrastructure for automating deployment and management of containerized applications. While the initial setup may be more complex, Kubernetes offers superior support for distributed systems and cross-platform deployment, ensuring consistency between local development and cloud production environments.
+
+---
+
+### **Sept. 18, 2024**
+
+## 1. **Establishment of 4 YAML Files**
+
+**Objective:**  
+Set up the deployment and services for both the Spring Boot application and the PostgreSQL database within Kubernetes. The goal was to create a functional setup where the application could communicate with the database through Kubernetes services.
+
+**Steps:**
+- Created 4 YAML files to manage the deployments and services for the application and the database:
+  - **`postgresql_deployment.yaml`**: Defines the PostgreSQL database deployment.
+  - **`postgresql_service.yaml`**: Defines the service for exposing PostgreSQL database.
+  - **`deployment.yaml`**: Defines the Spring Boot application deployment.
+  - **`service.yaml`**: Defines the service for exposing the Spring Boot application.
+  
+Each file had to be properly labeled and configured to ensure that the services correctly matched their respective Pods for communication within the Kubernetes cluster.
+
+**Using k3d to bypass macOS Compatibility Issues:**
+- **Docker Desktop**: Ensure Docker Desktop is installed and running on macOS, as k3d relies on Docker to create and manage Kubernetes clusters.
+- **Resource Allocation**: Adjust the resource allocation (CPU and Memory) in Docker Desktop settings to ensure the Kubernetes cluster has enough resources to run both the Spring Boot application and the PostgreSQL database.
+- **Networking**: macOS may have specific networking configurations that need to be addressed. Ensure that the Kubernetes services are correctly exposed and accessible from your local machine.
+- **File System Permissions**: macOS has stricter file system permissions. Ensure that any volume mounts or file accesses within the Kubernetes cluster have the correct permissions set.
+
+Each file had to be properly labeled and configured to ensure that the services correctly matched their respective Pods for communication within the Kubernetes cluster.
+
+---
+
+## 2. **Troubleshooting Application-Database Communication**
+
+**Problem:**  
+Initially, the Spring Boot application was unable to communicate with the PostgreSQL database due to incorrect configuration in the `application.properties` file. The application was trying to connect to the database using `localhost`, which doesn't work in a Kubernetes environment since the database is running in a different Pod.
+
+**Solution:**
+- Updated **`application.properties`** to use the PostgreSQL service name (`postgres-service`) instead of `localhost`, ensuring Kubernetes DNS resolves the correct service name. The modified connection string was as follows:
+
+  ```yml
+  spring.datasource.url=jdbc:postgresql://postgres-service:5432/echoaidb
+  spring.datasource.username=echoai_user
+  spring.datasource.password=echoai_password
+  ```
+
+- This allowed the application to correctly communicate with the PostgreSQL service, using the Kubernetes internal DNS for service discovery.
+
+**Result:**  
+The application and database were now properly connected, and internal communication between the two Pods was established successfully.
+
+---
+
+## 3. **Troubleshooting Label Mismatch in Services and Deployments**
+
+**Problem:**  
+Despite correcting the connection string, the Pods still couldn't communicate due to label mismatch issues between the deployments and services. This caused Kubernetes to not properly associate services with their respective Pods.
+
+**Steps to Resolve:**
+- **Key Diagnostic Command:** 
+  We used the following commands to pinpoint the label issue:
+  
+  ```bash
+  kubectl describe svc postgres-service
+  kubectl describe svc echoai-app-service
+  ```
+
+- **Findings:**  
+  The issue was that the labels in the services and deployments were inconsistent. The service selectors needed to match the labels defined in the deployments for correct traffic routing. Both `postgres-service` and `echoai-app-service` were unable to correctly associate with their respective Pods due to mismatched labels.
+
+**Solution:**
+- We standardized the labels across both the application and database deployment YAML files to ensure consistency. For example, the following label was applied uniformly:
+  
+  ```yaml
+  app: echoai-app  # This label now matches in both the service and deployment.
+  ```
+
+**Result:**  
+After applying the corrected labels, both services (`postgres-service` and `echoai-app-service`) correctly pointed to their respective Pods, allowing communication between the application and the database to work as intended.
+
+---
+
+## 4. **Remaining Issue: Timeout on Browser Access**
+
+**Problem:**  
+After successfully launching both the application and database Pods, and confirming their internal communication within the Kubernetes cluster, accessing the application externally via the browser still results in a timeout.
+
+```bash
+curl http://10.43.250.79:8080/public/hello
+```
+This indicates that while the application is correctly running, there is still an issue with external access to the application via the `LoadBalancer`.
+
+**Next Steps for Resolution:**
+1. **Check Traefik Configuration:**  
+   Ensure Traefik is properly configured as the load balancer and is routing traffic to the `echoai-app-service`.
+   
+2. **Test ClusterIP Connectivity:**  
+   From within the cluster, use the `ClusterIP` of `echoai-app-service` to test whether the service can be reached internally:
+   
+   ```bash
+   curl http://10.43.250.79:8080/public/hello
+   ```
+
+3. **Inspect Service and Network Configuration:**  
+   - Investigate if there are any `NetworkPolicy` or firewall settings that could be blocking external traffic.
+   - Ensure the correct ports are open and that the `LoadBalancer` is configured correctly to forward external requests to the application.
+
+---
+
+### **Current Status:**
+- The application and database Pods are running, and internal communication between them is working correctly.
+- External access to the application is not yet functional, as attempts to access the application through the browser result in a timeout.
+  
+### **Next Steps:**
+- Diagnose and fix the external access issue by reviewing Traefik, service configurations, and network policies.

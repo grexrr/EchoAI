@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echoai-app-deployment
+  labels:
+    app: echoai-app  # 统一标签
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echoai-app  # Selector 一致
+  template:
+    metadata:
+      labels:
+        app: echoai-app  # Pod 的标签
+    spec:
+      containers:
+        - name: spring-boot-container
+          image: grexrr/echoai-app:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 8080  # 应用暴露的端口
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres-service:5432/echoaidb
+            - name: SPRING_DATASOURCE_USERNAME
+              value: "echoai_user"
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: "echoai_password"
+            - name: SPRING_JPA_HIBERNATE_DDL_AUTO
+              value: "update"

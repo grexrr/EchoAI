@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: echoai-app-service
+spec:
+  selector:
+    app: echoai-app
+  ports:
+    - protocol: TCP
+      # the exposed port
+      port: 8080
+      # the port the pods will listen on internally
+      targetPort: 8080
+  # for the bright future
+  type: LoadBalancer
