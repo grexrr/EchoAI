@@ -3,35 +3,37 @@ kind: Deployment
 metadata:
   name: echoai-db-deployment
   labels:
-    app: echoai-app  # 统一标签为 echoai-app
-
+    app: echoai-app
+    role: db
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: echoai-app  # Selector 也使用 echoai-app
+      app: echoai-app
+      role: db
   template:
     metadata:
       labels:
-        app: echoai-app  # Pod 的标签
+        app: echoai-app
+        role: db
     spec:
       containers:
-        - name: echoai-db
-          image: postgres:13
-          ports:
-            - containerPort: 5432
-          env:
-            - name: POSTGRES_DB
-              value: "echoaidb"
-            - name: POSTGRES_USER
-              value: "echoai_user"
-            - name: POSTGRES_PASSWORD
-              value: "echoai_password"
-            - name: POSTGRES_LISTEN_ADDRESSES
-              value: '*'  
-          volumeMounts:
-            - name: postgres-data
-              mountPath: /var/lib/postgresql/data
-      volumes:
+      - name: echoai-db
+        image: postgres:13
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: "echoaidb"
+        - name: POSTGRES_USER
+          value: "echoai_user"
+        - name: POSTGRES_PASSWORD
+          value: "echoai_password"
+        - name: POSTGRES_LISTEN_ADDRESSES
+          value: '*'  
+        volumeMounts:
         - name: postgres-data
-          emptyDir: {}  # 临时存储
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgres-data
+        emptyDir: {}  # 临时存储

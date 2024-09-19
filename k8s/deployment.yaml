@@ -3,17 +3,19 @@ kind: Deployment
 metadata:
   name: echoai-app-deployment
   labels:
-    app: echoai-app  # 统一标签
+    app: echoai-app  
 
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: echoai-app  # Selector 一致
+      app: echoai-app  
+      role: app
   template:
     metadata:
       labels:
-        app: echoai-app  # Pod 的标签
+        app: echoai-app 
+        role: app
     spec:
       containers:
         - name: spring-boot-container

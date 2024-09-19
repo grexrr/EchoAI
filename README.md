@@ -423,3 +423,51 @@ This indicates that while the application is correctly running, there is still a
   
 ### **Next Steps:**
 - Diagnose and fix the external access issue by reviewing Traefik, service configurations, and network policies.
+
+---
+
+### **Sept. 19, 2024**
+
+## 1. **Debugging Kubernetes Service and Ingress Configuration**
+
+**Objective:**  
+Resolve the issues preventing external access to the Spring Boot application running in a Kubernetes cluster using k3d on macOS.
+
+**Key Issues:**
+
+1. **Label Matching Problem:**
+   - Initially, the Spring Boot application could run and was accessible within the pod via `localhost:8080`, but attempts to access the application externally (from outside the Kubernetes cluster) were unsuccessful.
+   - The first step involved ensuring the service and deployment labels matched correctly. Kubernetes relies on these labels to correctly route traffic from the service to the pods.
+   - **Solution:** By correcting the labels in the service and deployment YAML files, the service could correctly associate with the pods. This change allowed internal access within the cluster but still did not resolve the external access issue.
+
+2. **Switching from NodePort to LoadBalancer:**
+   - NodePort services, which expose the application on a port of the Kubernetes node, were not functioning as expected in the k3d environment.
+   - The decision was made to switch from a NodePort service to a LoadBalancer service. LoadBalancer services typically work well with cloud providers but can be simulated locally using k3d with Traefik as the ingress controller.
+   - **Action Taken:** The service was changed to `LoadBalancer` type, and an ingress was set up to handle the routing of traffic.
+
+3. **Ingress Configuration:**
+   - An `Ingress` resource was configured to route traffic from `echoai.localhost` to the application service.
+   - Initially, there were issues with Ingress routing correctly, as external access to the service remained unavailable. However, internal access via `curl http://localhost:8080/public/hello` and `curl http://172.19.0.3:8080/public/hello` started to work after configuring the Ingress, indicating progress.
+   - **Debugging Process:** The `Ingress` logs from the Traefik pod were examined, revealing errors such as "Cannot create service: service not found," which pointed to potential issues with how the Ingress was attempting to route traffic to the service.
+
+4. **Final Configuration and Testing:**
+   - After resolving label mismatches and ensuring that Traefik was correctly configured, the Ingress setup allowed the application to be accessed internally but still not externally from the host machine.
+   - **Outcome:** The application was confirmed to be working correctly within the Kubernetes cluster, but the external access issue persisted, likely due to network configurations or how k3d handles LoadBalancer and Ingress on macOS.
+
+**Key Learnings:**
+
+- **Label Matching:** Correct label configuration in Kubernetes YAML files is critical for ensuring services correctly route traffic to pods.
+- **Service Type:** NodePort services might not always work as expected in local Kubernetes environments like k3d, making LoadBalancer a more suitable choice when combined with a properly configured Ingress controller.
+- **Ingress and Traefik:** Properly configuring Ingress with Traefik in a local Kubernetes cluster can be complex but is essential for routing external traffic to services within the cluster.
+
+**Next Steps:**
+
+- Further investigate Traefik and Ingress configurations to fully resolve external access issues.
+- Explore additional network settings or alternative tools that might offer better support for local Kubernetes development environments on macOS.
+
+**Summary:**  
+This debugging session highlighted the importance of correct label matching in Kubernetes, the potential challenges of using NodePort services in k3d, and the complexities of configuring Ingress with Traefik for external access. Despite successfully routing traffic internally within the cluster, external access remains a challenge that will require further investigation.
+
+---
+
+This summary captures the key points and debugging steps taken during your session. If you need to dive deeper into any particular area or have further questions, feel free to ask!

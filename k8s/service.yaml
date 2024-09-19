@@ -5,11 +5,10 @@ metadata:
 spec:
   selector:
     app: echoai-app
+    role: app
   ports:
     - protocol: TCP
-      # the exposed port
-      port: 8080
-      # the port the pods will listen on internally
-      targetPort: 8080
+      port: 8080   # the exposed port
+      targetPort: 8080  # the port the pods will listen on internally
   # for the bright future
   type: LoadBalancer
