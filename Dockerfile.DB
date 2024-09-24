@@ -1,0 +1,13 @@
+# Start with the official PostgreSQL base image
+FROM postgres:13
+
+# Set environment variables
+ENV POSTGRES_DB=echoaidb
+ENV POSTGRES_USER=echoai_user
+ENV POSTGRES_PASSWORD=echoai_password
+
+# (Optional) Copy any initialization scripts or other necessary files
+# COPY init.sql /docker-entrypoint-initdb.d/
+
+# Expose the PostgreSQL port
+EXPOSE 5432
