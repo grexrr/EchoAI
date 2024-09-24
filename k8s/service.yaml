@@ -11,4 +11,4 @@ spec:
       port: 8080   # the exposed port
       targetPort: 8080  # the port the pods will listen on internally
   # for the bright future
-  type: LoadBalancer
+  type: ClusterIP

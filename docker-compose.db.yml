@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:13
+    image: echoai-db:latest
     environment:
       POSTGRES_DB: echoaidb
       POSTGRES_USER: echoai_user
