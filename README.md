@@ -470,4 +470,35 @@ This debugging session highlighted the importance of correct label matching in K
 
 ---
 
-This summary captures the key points and debugging steps taken during your session. If you need to dive deeper into any particular area or have further questions, feel free to ask!
+### **Sept. 23, 2024**
+
+## 1. **Debug `localhost` requests**
+
+**Objective:**  
+Again, try to resolve the issues preventing external access to the Spring Boot application running in a Kubernetes cluster using k3d on macOS.
+
+**Problem:**
+After searching configuration issues between `ingress` and `service` layers, my intuition told me the problem must be within the exterior `Traefik` which prevents any request toward localhost.
+
+So I performed: 
+```
+kubectl get services -n kube-system | grep traefik  
+```
+
+which gave me a serious of information related to `traefik` including the IP address always been called "**EXTERNAL-IP**" which I've been attempt to use it for accessing my test page.
+
+**TURNS OUT!!**
+
+This IP address, while using k3d, is the internal IP of docker container inaccessible for host. 
+
+`80:30531/TCP` gives me the endpoint, but without correct mapping, back-end cannot be visited by host. 
+
+**Solution:**
+
+Relaunch cluster only this time with correct mapping of the endpoints:
+
+```
+k3d cluster create mycluster --port "80:80@loadbalancer" --port "443:443@loadbalancer"
+```
+
+resolves the problem after 3 day of torture.
