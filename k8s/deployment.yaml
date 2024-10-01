@@ -4,6 +4,8 @@ metadata:
   name: echoai-app-deployment
   labels:
     app: echoai-app  
+  annotations:
+    redeploy: "true"
 
 spec:
   replicas: 1
@@ -20,7 +22,7 @@ spec:
       containers:
         - name: spring-boot-container
           image: grexrr/echoai-app:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
           - containerPort: 8080  # 应用暴露的端口
           env:

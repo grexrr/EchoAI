@@ -1,10 +1,12 @@
 grexrr/echoai/HelloController.class
-grexrr/echoai/security/CustomUserDetailsService.class
 grexrr/echoai/EchoaiApplication.class
-grexrr/echoai/security/SecurityConfig.class
 grexrr/echoai/service/UserService.class
+grexrr/echoai/service/UserServiceImpl.class
 grexrr/echoai/repository/UserRepository.class
-grexrr/echoai/security/AppConfig.class
 grexrr/echoai/model/User.class
+grexrr/echoai/security/CustomUserDetailsService.class
+grexrr/echoai/security/SecurityConfig.class
+grexrr/echoai/dto/UserDTO.class
+grexrr/echoai/security/AppConfig.class
 grexrr/echoai/controller/TestController.class
 grexrr/echoai/controller/UserController.class

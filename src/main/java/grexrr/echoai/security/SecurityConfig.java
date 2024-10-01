@@ -30,7 +30,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())        // Disable CSRF (FOR NOW !!!!!!)
                 .authorizeHttpRequests(auth -> auth  // Configuring Authentication Rules
-                                .requestMatchers("/public/**").permitAll()  // Public Paths
+                                .requestMatchers("/public/**", "/users", "/users/register").permitAll()  // Public Paths
                                 .anyRequest().authenticated()  // Others require authentication
                 )
                 .httpBasic(withDefaults());  // Default launching HTTP Basic authentication
