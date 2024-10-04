@@ -34,6 +34,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // 使用我们的自定义 CORS 配置
                 .csrf(csrf -> csrf.disable())        // Disable CSRF (FOR NOW !!!!!!)
                 .authorizeHttpRequests(auth -> auth  // Configuring Authentication Rules
                                 .requestMatchers("/public/**", "/users", "/users/register").permitAll()  // Public Paths
@@ -46,11 +47,12 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://echoai.localhost"));
+        configuration.setAllowedOrigins(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }

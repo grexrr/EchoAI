@@ -4,7 +4,6 @@ function App() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    // 替换为后端 API 地址
     fetch('/api/public/hello')
       .then((response) => response.text())
       .then((data) => setMessage(data))
