@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // 使用我们的自定义 CORS 配置
                 .csrf(csrf -> csrf.disable())        // Disable CSRF (FOR NOW !!!!!!)
                 .authorizeHttpRequests(auth -> auth  // Configuring Authentication Rules
-                                .requestMatchers("/public/**", "/users", "/users/register").permitAll()  // Public Paths
+                                .requestMatchers("/", "/api/public/hello", "/api/users", "/api/users/register").permitAll()  // Public Paths
                                 .anyRequest().authenticated()  // Others require authentication
                 )
                 .httpBasic(withDefaults());  // Default launching HTTP Basic authentication
@@ -47,12 +47,12 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedOrigins(Arrays.asList("http://echoai.localhost"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/api/**", configuration);
         return source;
     }
 }
