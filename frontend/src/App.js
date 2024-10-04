@@ -5,7 +5,7 @@ function App() {
 
   useEffect(() => {
     // 替换为后端 API 地址
-    fetch('http://echoai-app-service:8080/api/hello')
+    fetch('http://echoai-app-service:8080/public/hello')
       .then((response) => response.text())
       .then((data) => setMessage(data))
       .catch((error) => console.error('Error fetching data:', error));
