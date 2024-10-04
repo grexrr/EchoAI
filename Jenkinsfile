@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         APP_IMAGE = "grexrr/echoai-app:latest"
+        FRONTEND_IMAGE = "grexrr/echoai-frontend:latest"
         GIT_REPO = "https://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@github.com/grexrr/EchoAI.git"
         BUILDER_NAME = "mybuilder"  // 定义固定的 builder 名称
         DOCKER_CREDENTIAL = "9ec9a02b-850f-4a61-adcc-6bc2ea8a6f91"
@@ -53,6 +54,16 @@ pipeline {
                         docker buildx build --platform linux/amd64,linux/arm64 \
                         -t ${env.APP_IMAGE} -f Dockerfile --push .
                     """
+                }
+            }
+        }
+
+        stage('Build Frontend image') {
+            steps {
+                script {
+                    sh "docker buildx build --platform linux/amd64,linux/arm64 \
+                    -t ${env.FRONTEND_IMAGE} -f frontend/Dockerfile --push .
+                    "
                 }
             }
         }

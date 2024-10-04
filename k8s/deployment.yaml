@@ -34,3 +34,20 @@ spec:
               value: "echoai_password"
             - name: SPRING_JPA_HIBERNATE_DDL_AUTO
               value: "update"
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: echoai-app-service
+spec:
+  selector:
+    app: echoai-app
+    role: app
+  ports:
+    - protocol: TCP
+      port: 8080   # the exposed port
+      targetPort: 8080  # the port the pods will listen on internally
+  # for the bright future
+  type: ClusterIP

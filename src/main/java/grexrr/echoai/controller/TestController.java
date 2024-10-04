@@ -9,7 +9,7 @@ public class TestController{
     // Test Open Endpoint
     @GetMapping("/public/hello")
     public String publicHello(){
-        return "Hello Hello from public endpoint";
+        return "Hello Hello Hello from public endpoint";
     }
 
     // Test Protected Endpoint

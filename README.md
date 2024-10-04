@@ -502,3 +502,26 @@ k3d cluster create mycluster --port "80:80@loadbalancer" --port "443:443@loadbal
 ```
 
 resolves the problem after 3 day of torture.
+
+***
+
+### **Oct. 1, 2024**
+
+### Objectives
+
+- Refactor the user registration and deletion endpoints to follow RESTful API best practices.
+- Introduce Data Transfer Objects (DTO) to enhance security and maintain a clear separation between layers.
+- Modify `UserController`, `UserService`, and related classes to use `UserDTO`.
+- Update `SecurityConfig` to accommodate the new endpoints.
+- Test the modified functionalities to ensure they work as expected.
+
+---
+
+## Highlights
+
+- Implemented `UserDTO` to encapsulate user data during transfers between client and server, avoiding direct exposure of the `User` entity.
+- Changed the user registration endpoint from `GET` to `POST` and modified the path to conform with RESTful conventions.
+- Updated `SecurityConfig` to allow anonymous access to the new registration endpoint.
+- Switched from using `@RequestParam` to `@RequestBody` in `UserController`, enhancing data handling and security.
+- Modified the user deletion endpoint to use `DELETE` method with `@PathVariable`, aligning with RESTful design principles.
+

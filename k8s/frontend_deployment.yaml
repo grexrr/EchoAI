@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echoai-frontend-deployment
+  labels:
+    app: echoai-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: echoai-frontend
+  template:
+    metadata:
+      labels:
+        app: echoai-frontend
+    spec:
+      containers:
+      - name: nginx-frontend
+        image: grexrr/echoai-frontend:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echoai-frontend-service
+spec:
+  selector:
+    app: echoai-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
