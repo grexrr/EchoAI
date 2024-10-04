@@ -9,10 +9,17 @@ spec:
     - host: echoai.localhost
       http:
         paths:
-          - path: /
+          - path: /api
             pathType: Prefix
             backend:
               service:
                 name: echoai-app-service
                 port:
                   number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: echoai-frontend-service
+                port:
+                  number: 80
