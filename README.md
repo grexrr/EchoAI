@@ -525,3 +525,111 @@ resolves the problem after 3 day of torture.
 - Switched from using `@RequestParam` to `@RequestBody` in `UserController`, enhancing data handling and security.
 - Modified the user deletion endpoint to use `DELETE` method with `@PathVariable`, aligning with RESTful design principles.
 
+---
+
+### **Oct. 4,  2024**
+## **Task 1: Basic Chat Window Creation**
+
+**Objective:**
+Develop a basic front-end chat window that provides users with an interface to communicate with their conversation partners, supporting AI-suggested prompts, automatic replies, and manual input.
+
+**Task Details:**
+
+1. **UI Design and Front-End Framework Selection**
+   - Implement the chat window using React.
+   - Design a user-friendly chat interface, including a message display area, input box, and a button area for AI reply options.
+
+2. **Core Functionality Implementation**
+   - **Message Display Area**: Display all chat content, including messages from User A, User B, and AI-generated replies.
+   - **Manual Input Box**: Implement the functionality for User B to manually input messages, sending them to the backend upon entry.
+   - **AI Reply Buttons**: Add buttons for selecting suggested replies and automatic replies, allowing User B to choose AI-generated messages.
+
+3. **Front-End and Back-End Interaction**
+   - Establish a communication mechanism between the front-end chat window and the back-end server (e.g., via REST API or WebSocket) to enable real-time message interaction.
+   - Ensure that conversation content is displayed in real-time on the user interface and that AI-generated messages are quickly shown when automatic replies are used by User B.
+
+---
+## **Task 2: AI Agent Module Integration**
+
+**Objective:**
+Integrate the system with GPT-4 to generate automatic replies and suggested responses during user conversations.
+
+**Task Details:**
+
+1. **API Integration Management**
+   - Integrate the GPT-4 API to ensure real-time communication with OpenAI's services.
+   - Set up request templates to ensure each request to GPT-4 includes complete context information.
+
+2. **Context Configuration**
+   - Determine which conversation content should be passed as context to GPT-4 to ensure the model generates appropriate suggestions and replies.
+   - Maintain session context data to ensure each request has complete and timely context.
+
+---
+## **Task 3: Conversation Context Manager**
+
+**Objective:**
+Design and implement a conversation context manager to ensure AI understands the full context of each conversation for generating appropriate replies.
+
+**Task Details:**
+
+1. **Context Data Structure Design**
+   - Design the context data structure for sessions, storing content from each conversation, including message type, user, timestamp, etc.
+   - Persist conversation history for subsequent analysis and processing.
+
+2. **Context Caching and Retrieval**
+   - Design a caching mechanism for context to reduce redundant database access and improve system response efficiency.
+   - Ensure quick retrieval of the latest conversation context each time GPT-4 is called.
+
+3. **Conversation Flow Management**
+   - Assign a unique identifier to each conversation to track and manage concurrent session flows.
+
+---
+## **Task 4: User Choice and Reply Type Integration**
+
+**Objective:**
+Enable User B to freely choose the reply method, with the system processing based on the selection.
+
+**Task Details:**
+
+1. **Suggested Replies and User Choice**
+   - When User A initiates a conversation, generate several suggested replies for User B to choose from.
+   - Ensure users can select from various styles of replies, displayed through the front-end interface.
+
+2. **Automatic Reply Trigger Logic**
+   - When User B authorizes automatic replies, the system calls GPT-4 to automatically generate and send replies to User A.
+   - Stop automated operations and fully hand over control to manual operation when User B disables automatic reply authorization.
+
+3. **Integration of Manual Input**
+   - After User B uses manual input, the system should incorporate the input into the conversation history and continue using it as context for subsequent automatic replies.
+
+---
+## **Task 5: Permissions and User Authorization Management**
+
+**Objective:**
+Ensure User B's authorization for automatic replies is controlled to prevent unauthorized automated responses.
+
+**Task Details:**
+
+1. **Authorization Management**
+   - Provide clear buttons or switches in the chat interface for User B to choose whether to enable automatic replies.
+   - Save the user's authorization status to control whether AI replies are automatically triggered.
+
+2. **Permission Recording and Status Management**
+   - Record the user's authorization history to ensure each session has an authorization record for subsequent analysis and control.
+   - Update authorization status in real-time to ensure system logic aligns with the user's actual intent.
+
+---
+## **Task 6: System Scalability and Maintainability Design**
+
+**Objective:**
+Ensure the AI agent infrastructure is scalable and maintainable to quickly add new features in the future.
+
+**Task Details:**
+
+1. **Modular Design**
+   - Modularize functions such as the chat window, GPT-4 API integration, and conversation context management for independent development and maintenance.
+   - Reduce coupling between modules to facilitate the addition of new features or functions during system expansion.
+
+2. **Capability to Scale to More Users**
+   - Ensure the system can handle a large
+
