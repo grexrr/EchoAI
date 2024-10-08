@@ -18,6 +18,9 @@ spec:
       - name: nginx-frontend
         image: grexrr/echoai-frontend:latest
         imagePullPolicy: Always
+        env:
+          - name: REACT_APP_API_URL
+            value: "http://echoai-app-service:8080"
         ports:
         - containerPort: 80
 ---

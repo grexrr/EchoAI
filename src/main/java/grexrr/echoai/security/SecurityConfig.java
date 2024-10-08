@@ -34,7 +34,7 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // 使用我们的自定义 CORS 配置
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))  // Use our custom CORS configuration
                 .csrf(csrf -> csrf.disable())        // Disable CSRF (FOR NOW !!!!!!)
                 .authorizeHttpRequests(auth -> auth  // Configuring Authentication Rules
                                 .requestMatchers("/", "/api/public/hello", "/api/users", "/api/users/register").permitAll()  // Public Paths

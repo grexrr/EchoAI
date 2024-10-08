@@ -4,8 +4,9 @@ function App() {
   const [message, setMessage] = useState('');
 
   useEffect(() => {
+    const apiUrl = process.env.REACT_APP_API_URL || '';
     // 替换为后端 API 地址
-    fetch('/api/public/hello')
+    fetch(`${apiUrl}/api/public/hello`)
       .then((response) => response.text())
       .then((data) => setMessage(data))
       .catch((error) => console.error('Error fetching data:', error));
